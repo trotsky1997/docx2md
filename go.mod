@@ -1,4 +1,4 @@
-module github.com/mattn/docx2md
+module github.com/trotsky1997/docx2md
 
 go 1.14
 
