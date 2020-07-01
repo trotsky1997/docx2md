@@ -40,4 +40,6 @@ MIT
 
 ## Author
 
-Yasuhiro Matsumoto
+Highest respect to Mr.Yasuhiro Matsumoto!
+
+Hacked lightly by Trotsky1997.
