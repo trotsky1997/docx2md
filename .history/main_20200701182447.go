@@ -477,7 +477,7 @@ func findFile(files []*zip.File, target string) *zip.File {
 }
 
 func docx2md(arg string, embed bool) error {
-	defer wt.Done()
+	wt.Add(1)
 	fmt.Println("Processing " + arg)
 	r, err := zip.OpenReader(arg)
 	if err != nil {
@@ -543,12 +543,8 @@ func docx2md(arg string, embed bool) error {
 	// fmt.Print(buf.String())
 	file, _ := os.Create(arg + ".md")
 	defer file.Close()
-	ch := make(chan int, 1)
-	go func() {
-		buf.WriteTo(file)
-		ch <- 1
-	}()
-	<-ch
+	go buf.WriteTo(file)
+	wt.Done()
 	return nil
 }
 
@@ -562,7 +558,6 @@ func main() {
 		os.Exit(1)
 	}
 	for _, arg := range flag.Args() {
-		wt.Add(1)
 		go docx2md(arg, embed)
 	}
 	wt.Wait()

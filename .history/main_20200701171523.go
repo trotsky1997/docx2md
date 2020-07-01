@@ -10,12 +10,12 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"os"
 	"path"
 	"path/filepath"
 	"strconv"
 	"strings"
-	"sync"
 
 	"github.com/mattn/go-runewidth"
 )
@@ -123,8 +123,6 @@ type Node struct {
 	Content []byte     `xml:",innerxml"`
 	Nodes   []Node     `xml:",any"`
 }
-
-var wt sync.WaitGroup
 
 func (n *Node) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 	n.Attrs = start.Attr
@@ -477,8 +475,6 @@ func findFile(files []*zip.File, target string) *zip.File {
 }
 
 func docx2md(arg string, embed bool) error {
-	defer wt.Done()
-	fmt.Println("Processing " + arg)
 	r, err := zip.OpenReader(arg)
 	if err != nil {
 		return err
@@ -540,20 +536,12 @@ func docx2md(arg string, embed bool) error {
 	if err != nil {
 		return err
 	}
-	// fmt.Print(buf.String())
-	file, _ := os.Create(arg + ".md")
-	defer file.Close()
-	ch := make(chan int, 1)
-	go func() {
-		buf.WriteTo(file)
-		ch <- 1
-	}()
-	<-ch
+	fmt.Print(buf.String())
+
 	return nil
 }
 
 func main() {
-
 	var embed bool
 	flag.BoolVar(&embed, "embed", false, "embed resources")
 	flag.Parse()
@@ -562,8 +550,8 @@ func main() {
 		os.Exit(1)
 	}
 	for _, arg := range flag.Args() {
-		wt.Add(1)
-		go docx2md(arg, embed)
+		if err := docx2md(arg, embed); err != nil {
+			log.Fatal(err)
+		}
 	}
-	wt.Wait()
 }

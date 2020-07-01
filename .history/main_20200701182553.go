@@ -543,12 +543,7 @@ func docx2md(arg string, embed bool) error {
 	// fmt.Print(buf.String())
 	file, _ := os.Create(arg + ".md")
 	defer file.Close()
-	ch := make(chan int, 1)
-	go func() {
-		buf.WriteTo(file)
-		ch <- 1
-	}()
-	<-ch
+	go buf.WriteTo(file)
 	return nil
 }
 
